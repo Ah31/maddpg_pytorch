@@ -103,7 +103,7 @@ class Agent():
 
         # Q_targets = rew.unsqueeze(-1) + (GAMMA * (1.0 - done.unsqueeze(-1)) * Q_targets_next)
 
-        Q_targets = torch.clamp(rew.unsqueeze(-1) + (GAMMA * (1.0 - done.unsqueeze(-1)) * Q_targets_next), min=-1, max=1)
+        Q_targets = torch.clamp(rew + (GAMMA * (1.0 - done) * Q_targets_next), min=-1, max=1)
 
         # Compute critic loss
         tensor_obs_n = torch.cat(obs_n, dim=-1)
@@ -160,6 +160,7 @@ class Agent():
         with torch.no_grad():
             action = F.softmax(self.actor_local(state))
         if add_noise:
+            action = action.to('cpu')
             action = action.data.numpy()
             action += self.noise.sample()
         action = np.clip(action, -1, 1)
